@@ -68,10 +68,10 @@ fn pretty_registry(hklm: &RegKey, subkey: &str) -> Result<()> {
                     name.blue(),
                     if longest_name_length + 2 + value.len() > w {
                         format!(
-                            "({}>{} characters - run {}{}",
+                            "({} > {} characters - run {}{}",
                             value.len(),
                             w - longest_name_length - 2,
-                            if name == "path" {
+                            if name == "Path" {
                                 "`wenv path`".purple().to_string()
                             } else {
                                 format!("`wenv show {name}`").purple().to_string()
@@ -145,11 +145,16 @@ fn main() -> Result<()> {
                     let path = value.to_str().unwrap();
                     let path = path.split(';').collect::<Vec<_>>();
                     for path_str in path {
+                        // TODO: support windows environment variables
                         let path = Path::new(path_str);
 
                         // check if path exists
                         if !path.exists() {
-                            println!("{}", format!("{} {}", path_str, "(does not exist)").red());
+                            if path_str.len() == 0 {
+                                println!("{}", "(redundant semicolon)".red());
+                            } else {
+                                println!("{}", format!("{} {}", path_str, "(does not exist)").red());
+                            }
                             problem_count += 1;
                             continue;
                         }
